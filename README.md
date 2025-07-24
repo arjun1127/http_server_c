@@ -54,6 +54,7 @@ Returns full status of all embedded components:
 ## 🚀 Build & Run
 
 ```bash
+cd smart_Server
 make
 ./smart_server
 ```
