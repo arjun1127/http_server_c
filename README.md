@@ -62,8 +62,7 @@ make
 Then open your browser or use curl:
 
 ```bash
-curl http://127.0.0.1:8282/sensor/temp
-curl -X POST http://127.0.0.1:8282/led?state=on
+curl http://127.0.0.1:8282/
 ```
 
 ---
