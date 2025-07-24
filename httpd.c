@@ -1,3 +1,4 @@
+//test for buiding http server 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,7 +7,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <signal.h>
-#include "rate_limit.h"
+//#include "rate_limit.h"
 
 #define PORT 8282
 #define BUFFER_SIZE 8192
