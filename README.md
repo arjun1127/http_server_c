@@ -89,6 +89,27 @@ This project was designed to:
 * Serve `dashboard.html` to visualize data live
 * Implement WebSocket server for real-time updates
 
+
+## details
+Designed and Developed the project to understand the internal working of C in embedded systems and how having a custom server gives credibility and flexibility in obtaining the desired results, So the Project is a ,
+  multithreaded HTTP server written in pure C simulating embedded hardware interactions.
+It involves the usage of: 
+
+TCP/IP socket programming
+Embedded device simulation (sensor + actuator)
+Token bucket rate limiting
+Thread-safe server concurrency
+Low-level memory handling and request parsing
+Handles multiple clients using pthreads,
+
+ Simulated routes for:
+/sensor/temp → returns mock temperature sensor data
+/led?state=on|off → controls simulated LED (POST only)
+/device/status → full device status in JSON
+IP-based token bucket rate limiter (5 req burst @ 1 rps)
+
+Result obtained by accessing the Local server, and by using respected routes.
+
 ---
 
 MIT License
