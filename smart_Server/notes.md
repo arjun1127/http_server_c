@@ -142,3 +142,91 @@
    +-----------+                +-----------+
 
 ```
+
+# HOW TO BUILD A SERVER ???
+
+When we say “building a web server”, we are essentially creating a program that:
+
+Listens for connections from clients (like browsers, Postman, or even an ESP32).
+
+Understands what the client is asking for (the HTTP request).
+
+Decides what to do based on that request.
+
+Sends a proper response back (in HTML, JSON, plain text, etc.).
+
+## 1. Headers (<unistd.h>, <arpa/inet.h>)
+
+These headers give us access to system-level networking functions:
+
+close() to properly shut sockets (cleanup).
+
+<arpa/inet.h> for IP-related functions (inet_addr, htons, etc.), which help convert between human-readable IP/ports and what the network stack actually uses.
+
+Without them, your program wouldn’t know how to “speak TCP/IP.”
+
+📌 Why needed? Because HTTP runs on top of TCP/IP, so our server must manage sockets at the system level.
+
+
+## 2. send_response (Build + send HTTP headers + body)
+
+HTTP requires structured responses (status line, headers, then body). Example:
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 42
+
+{"temperature": 28.4, "led": "on"}
+
+
+You can’t just send “28.4” or “on/off” — the client wouldn’t understand.
+
+📌 Why needed? This ensures browsers, Postman, or other IoT devices interpret your reply as valid HTTP, not random text.
+
+
+## 3. get_query_param (Extract query string values like ?state=on)
+
+When a client sends GET /led?state=on, we must pull out state=on.
+
+Otherwise, the server wouldn’t know the client’s intention (turn LED on vs off).
+
+📌 Why needed? To interact dynamically with clients — sensors, toggles, etc. If we can’t parse queries, our server is just a “file dumper.”
+
+
+## 4.parse_http_request (Split raw request into method, path, query)
+
+Raw request from client looks like this:
+
+GET /temperature HTTP/1.1
+Host: 192.168.0.10
+
+
+We must parse out:
+
+Method (GET)
+
+Path (/temperature)
+
+Query params (?state=on)
+
+📌 Why needed? This is how the server decides what action to take (send sensor value, toggle LED, return error).
+
+
+## 5.handle_client (Main workflow per request)
+
+This is the heart of the server loop:
+
+Check rate limit → prevent abuse/spam.(optional)
+
+Receive request → read raw HTTP text from socket.
+
+Parse request → understand what client wants.
+
+Route to handler → if /led, toggle LED; if /temperature, read sensor.
+
+Respond → send back HTTP headers + JSON/HTML.
+
+Cleanup → close socket to free resources.
+
+📌 Why needed? This creates the flow of interaction between client and server. Without this orchestration, your server either crashes or doesn’t know how to respond.
+
