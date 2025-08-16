@@ -6,9 +6,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+// close(int fd) → used at the end to close the socket connection.
+// read() / write() are also in this header (though we are using recv() and send() from <sys/socket.h>).
 #include <unistd.h>
+// Functions for Internet address manipulation (IPv4/IPv6).
 #include <arpa/inet.h>
 
+//wkt that the response type for a server should include the status, content-type, length,and connection so define a function for that 
+//as output we can see the response string 
 void send_response(int client_sock, const char *status, const char *content_type, const char *body) {
     char response[BUFFER_SIZE];
     snprintf(response, sizeof(response),
@@ -18,8 +23,27 @@ void send_response(int client_sock, const char *status, const char *content_type
         "Connection: close\r\n\r\n"
         "%s",
         status, content_type, strlen(body), body);
+        //send() transmits the data over the TCP socket to the browser/client.
     send(client_sock, response, strlen(response), 0);
 }
+//example res should be : Example for status="200 OK", content_type="application/json", body="{\"temperature\":28.5}":
+
+
+// Extracts the value of a query parameter from a URL.
+// Example:
+// /led?state=on → key="state" → returns "on".
+
+//follow this algorithm to pasrse the query
+
+// strstr(query, key) → finds "state" in "state=on".
+// Moves pointer after "state".
+// Checks = is there.
+// Finds end (either & or \0).
+// Copies value into value[].
+// url_decode(value) → decodes things like %20 → space.
+// Returns the parameter’s value.
+// So this is the parser for query strings.
+
 
 char *get_query_param(const char *query, const char *key) {
     static char value[256];
@@ -42,6 +66,20 @@ char *get_query_param(const char *query, const char *key) {
     return value;
 }
 
+
+//parsing http request
+// Splits the HTTP request into:
+// HTTP method (e.g., "GET", "POST").
+// Path (e.g., "/led").
+// Query string (e.g., "state=on").
+// How?
+// sscanf(request, "%s %s", method, path);
+// From "GET /led?state=on HTTP/1.1", it extracts:
+// method="GET"
+// path="/led?state=on".
+// strchr(path, '?') → finds ?.
+// Cuts path at ?, copies "state=on" into query.
+// This enables the routing logic later.
 void parse_http_request(const char *request, char *method, char *path, char *query) {
     sscanf(request, "%s %s", method, path);
 
@@ -56,6 +94,9 @@ void parse_http_request(const char *request, char *method, char *path, char *que
 }
 
 void handle_client(client_info_t *client) {
+//     Allocates a receive buffer.
+// Extracts client_sock (the TCP connection fd).
+// Gets client’s IP address (inet_ntoa).
     char buffer[BUFFER_SIZE] = {0};
     int client_sock = client->client_sock;
     struct sockaddr_in addr = client->client_addr;
@@ -63,6 +104,9 @@ void handle_client(client_info_t *client) {
 
     // Rate limiting
     if (!is_allowed(client_ip)) {
+// Uses rate_limit.c to check if this IP has exceeded request limits.
+// If yes → sends HTTP 429 Too Many Requests and kills connection.
+// Prevents DoS/spam.
         send_response(client_sock, "429 Too Many Requests", "text/plain", "Rate limit exceeded. Try again later.");
         close(client_sock);
         free(client);
