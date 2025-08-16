@@ -178,3 +178,10 @@ void handle_client(client_info_t *client) {
     free(client);
     pthread_exit(NULL);
 }
+
+// We need all this because HTTP is not just “sending numbers.” It’s a protocol with rules (request → parse → process → structured response). Each part ensures:
+// Networking layer works (headers).
+// Requests are understood (parse_http_request).
+// Actions are meaningful (get_query_param, routing).
+// Responses are valid (send_response).
+// Server stays stable (handle_client, cleanup, rate limiting).
