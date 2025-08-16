@@ -1,20 +1,37 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
+#include <stdio.h>//for standard inp and op func
+#include <stdlib.h>//general utilites like malloc ,free ,exit etc.
+#include <string.h>//...string functions like memset,strcpy,strcmp,
+//important for server
+#include <unistd.h>//POSIX functions , like close,read,write,sleep etc. 
+// The POSIX (Portable Operating System Interface) 
+// standards define a set of C language functions 
+// that provide a standardized interface to operating 
+// system services, primarily for Unix-like systems. 
+#include <signal.h>//signal handling with signal() , SIGPIPE
+
+//most important for internet operations like htons, inet_addt 
 #include <arpa/inet.h>
+
+//Socket API ,with this we can use socket, bind,listen,accept etc
 #include <sys/socket.h>
-#include <pthread.h>
+#include <pthread.h>//POSIX threads ,like pthread_create,pthread_detach
 
-#include "server.h"
-#include "rate_limit.h"
+#include "server.h" //from server.c to abstract server.h
+#include "rate_limit.h" //...
 
-#define PORT 8282
+//give any port number on which your server will run 
+//it will prob server listens on 127.0.0.1:any_port_u_define
+#define PORT 8282 
 
 // Thread function for each client
+//thread is a single, sequential flow of execution within a program. 
+// It's essentially a "mini-process" that shares resources with other 
+// threads within the same larger program or process.
+
 void *client_thread(void *arg) {
-    client_info_t *info = (client_info_t *)arg;
+    //arg is a pointer to data when the tread starts
+    //arg holds client socket+address
+    client_info_t *info = (client_info_t *)arg;//so we need to cast arg to client_info_t
     handle_client(info);
     free(info);  // Free memory after done
     return NULL;
